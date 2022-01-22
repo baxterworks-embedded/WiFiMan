@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "Boot.h"
 
 void reboot()
@@ -8,90 +9,90 @@ void reboot()
 bool clear()
 {
 
-    if(SPIFFS.begin())
+    if(LittleFS.begin())
     {
-        if(!SPIFFS.exists("/config.json"))
+        if(!LittleFS.exists("/config.json"))
             return true;
 
-        if(SPIFFS.remove("/config.json"))
+        if(LittleFS.remove("/config.json"))
             return true;
         else
             return false;
     }
     else
     {
-        DEBUG_MSG("#>< Clear : SPIFFS Error!\n");
+        DEBUG_MSG("#>< Clear : LittleFS Error!\n");
         return false;
     }
 }
 
 bool makeBootFlag()
 {
-    if(SPIFFS.begin())
+    if(LittleFS.begin())
     {
-        File configFile = SPIFFS.open("/boot.conf", "w");
+        File configFile = LittleFS.open("/boot.conf", "w");
         if (!configFile) 
         {
-            DEBUG_MSG("#>< makeBootFlag : SPIFFS Error! Cannot open /boot.conf\n");
-            SPIFFS.end();
+            DEBUG_MSG("#>< makeBootFlag : LittleFS Error! Cannot open /boot.conf\n");
+            LittleFS.end();
             return false;
         }
         else
         {
             configFile.print("skip-auto-connect");
             configFile.close();
-            SPIFFS.end();
+            LittleFS.end();
             return true;
         }
     }
     else
     {
-        DEBUG_MSG("#>< makeBootFlag : SPIFFS Error!\n");
+        DEBUG_MSG("#>< makeBootFlag : LittleFS Error!\n");
         return false;
     }
 }
 
 bool clearBootFlag()
 {
-    if(SPIFFS.begin())
+    if(LittleFS.begin())
     {
-        if (SPIFFS.exists("/boot.conf")) 
+        if (LittleFS.exists("/boot.conf")) 
         {
-            SPIFFS.remove("/boot.conf");
-            SPIFFS.end();
+            LittleFS.remove("/boot.conf");
+            LittleFS.end();
             return true;
         }
         else
         {
-            SPIFFS.end();
+            LittleFS.end();
             return true;
         }
     }
     else
     {
-        DEBUG_MSG("#>< clearBootFlag : SPIFFS Error!\n");
+        DEBUG_MSG("#>< clearBootFlag : LittleFS Error!\n");
         return false;
     }
 }
 
 bool getBootFlag()
 {
-    if(SPIFFS.begin())
+    if(LittleFS.begin())
     {
-        if (SPIFFS.exists("/boot.conf")) 
+        if (LittleFS.exists("/boot.conf")) 
         {
-            SPIFFS.end();
+            LittleFS.end();
             return true;
         }
         else
         {
-            SPIFFS.end();
+            LittleFS.end();
             return false;
         }
     }
     else
     {
-        DEBUG_MSG("#>< getBootFlag : SPIFFS Error!\n");
+        DEBUG_MSG("#>< getBootFlag : LittleFS Error!\n");
         return false;
     }
 }
@@ -115,4 +116,5 @@ bool rebootToApMode()
     makeBootFlag();
     //then reboot
     reboot();
+    return false;
 }

@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include "WiFiMan.h"
 
 WiFiMan::WiFiMan()
@@ -21,11 +22,11 @@ bool WiFiMan::deleteConfig()
 {
     bool delResult = true;
     DEBUG_MSG("#>> deleteConfig\n");
-    if(SPIFFS.begin())
+    if(LittleFS.begin())
     {
-        if(SPIFFS.exists("/config.json"))
+        if(LittleFS.exists("/config.json"))
         {
-            if(SPIFFS.remove("/config.json\n"))
+            if(LittleFS.remove("/config.json\n"))
                 DEBUG_MSG("#__ Deleted config.json\n");
             else
             {
@@ -38,9 +39,9 @@ bool WiFiMan::deleteConfig()
             DEBUG_MSG("#__ config.json is not exists\n");
         }
 
-        if (SPIFFS.exists("/customConfig.json")) 
+        if (LittleFS.exists("/customConfig.json")) 
         {
-            if(SPIFFS.remove("/customConfig.json"))
+            if(LittleFS.remove("/customConfig.json"))
                 DEBUG_MSG("#__ Deleted customConfig.json.\n");
             else
             {
@@ -54,7 +55,7 @@ bool WiFiMan::deleteConfig()
         }
         
         DEBUG_MSG("#<< deleteConfig-end\n");
-        SPIFFS.end();
+        LittleFS.end();
         return delResult;
     }
     else
@@ -74,12 +75,12 @@ void WiFiMan::forceApMode()
 bool WiFiMan::readConfig()
 {
     DEBUG_MSG("#>> readConfig\n");
-    if(SPIFFS.begin())
+    if(LittleFS.begin())
     {
-        if (SPIFFS.exists("/config.json")) 
+        if (LittleFS.exists("/config.json")) 
         {
             DEBUG_MSG("#__ Reading config.json\n");
-            File configFile = SPIFFS.open("/config.json", "r");
+            File configFile = LittleFS.open("/config.json", "r");
             if (configFile) 
             {
                 size_t size = configFile.size();
@@ -99,7 +100,7 @@ bool WiFiMan::readConfig()
                     DEBUG_MSG("#__ Close config.js\n");
                     configFile.close();
                     DEBUG_MSG("#__ Unmount FS\n");
-                    SPIFFS.end();
+                    LittleFS.end();
 
                     DEBUG_MSG("#__ Trying to delete config.js\n");
                     deleteConfig();
@@ -129,7 +130,7 @@ bool WiFiMan::readConfig()
                     _masterPasswd = json["masterPasswd"].as<String>();
 
                     configFile.close();
-                    SPIFFS.end();
+                    LittleFS.end();
                     DEBUG_MSG("#<< readConfig-end\n");
                     return true;
                 }
@@ -138,7 +139,7 @@ bool WiFiMan::readConfig()
             {
                 DEBUG_MSG("#__ Cannot open config.json\n");
                 DEBUG_MSG("#__ Unmount FS\n");
-                SPIFFS.end();
+                LittleFS.end();
                 DEBUG_MSG("#<< readConfig-end\n");
                 return false;
             }
@@ -147,7 +148,7 @@ bool WiFiMan::readConfig()
         {
             DEBUG_MSG("#__ config.json not exists\n");
             DEBUG_MSG("#__ Unmount FS\n");
-            SPIFFS.end();
+            LittleFS.end();
             DEBUG_MSG("#__ write template for config.js\n");
             writeConfig("","","","","","","","","","");
             DEBUG_MSG("#<< readConfig-end\n");
@@ -195,14 +196,14 @@ bool WiFiMan::writeConfig(String wifiSsid,String wifiPasswd,String mqttAddr,Stri
     jsonDoc["masterPasswd"] = _masterPasswd;
     
     
-    if(SPIFFS.begin())
+    if(LittleFS.begin())
     {
-        File configFile = SPIFFS.open("/config.json", "w");
+        File configFile = LittleFS.open("/config.json", "w");
         if (!configFile) 
         {
             DEBUG_MSG("#__ Failed to open config file for writing\n");
             DEBUG_MSG("#__ Unmount FS\n");
-            SPIFFS.end();
+            LittleFS.end();
             DEBUG_MSG("#<< writeConfig-end\n");
             return false;
         }
@@ -212,7 +213,7 @@ bool WiFiMan::writeConfig(String wifiSsid,String wifiPasswd,String mqttAddr,Stri
         DEBUG_MSG("#__ Save successed!\n");
         configFile.close();
         DEBUG_MSG("#__ Unmount FS\n");
-        SPIFFS.end();
+        LittleFS.end();
         DEBUG_MSG("#<< writeConfig-end\n");
         return true;
     }
@@ -1229,14 +1230,14 @@ bool WiFiMan::saveCustomConfig()
         jsonDoc["key-list"] = keyList;
 
         DEBUG_MSG("#__ Writing customConfig.json\n");
-        if(SPIFFS.begin())
+        if(LittleFS.begin())
         {
-            File configFile = SPIFFS.open("/customConfig.json", "w");
+            File configFile = LittleFS.open("/customConfig.json", "w");
             if (!configFile) 
             {
                 DEBUG_MSG("#__ Failed to open customConfig file for writing\n");
                 DEBUG_MSG("#__ Unmount FS\n");
-                SPIFFS.end();
+                LittleFS.end();
                 DEBUG_MSG("#<< saveCustomConfig-end\n");
                 return false;
             }
@@ -1246,7 +1247,7 @@ bool WiFiMan::saveCustomConfig()
             DEBUG_MSG("#__ Save successed!\n");
             configFile.close();
             DEBUG_MSG("#__ Unmount FS\n");
-            SPIFFS.end();
+            LittleFS.end();
             DEBUG_MSG("#<< saveCustomConfig-end\n");
             return true;
         }
@@ -1264,12 +1265,12 @@ bool WiFiMan::saveCustomConfig()
         DEBUG_MSG("#__ Trying to delete old customConfig.json if exists.\n");
 
         //delete old customConfig.json
-        if(SPIFFS.begin())
+        if(LittleFS.begin())
         {
-            if (SPIFFS.exists("/customConfig.json")) 
-                SPIFFS.remove("/customConfig.json");
+            if (LittleFS.exists("/customConfig.json")) 
+                LittleFS.remove("/customConfig.json");
             DEBUG_MSG("#__ Deleted customConfig.json.\n");
-            SPIFFS.end();
+            LittleFS.end();
         }
         else
         {
@@ -1286,9 +1287,9 @@ bool WiFiMan::saveCustomConfig()
 bool WiFiMan::getCustomConfig(CustomConfig *customConf)
 {
     DEBUG_MSG("#>> getCustomConfigJson\n");
-    if(SPIFFS.begin())
+    if(LittleFS.begin())
     {
-        File customConfigFile = SPIFFS.open("/customConfig.json", "r");
+        File customConfigFile = LittleFS.open("/customConfig.json", "r");
         if (customConfigFile) 
         {
             DEBUG_MSG("#__ Reading customConfig.json.\n");
@@ -1307,7 +1308,7 @@ bool WiFiMan::getCustomConfig(CustomConfig *customConf)
             if(jsonError)
             {
                 customConfigFile.close();
-                SPIFFS.end();
+                LittleFS.end();
                 DEBUG_MSG("#__ Cannot parse json.\n");
                 DEBUG_MSG("#<< readCustomConfigJson-end\n");
                 return false;
@@ -1315,7 +1316,7 @@ bool WiFiMan::getCustomConfig(CustomConfig *customConf)
             else
             {
                 customConfigFile.close();
-                SPIFFS.end();
+                LittleFS.end();
                 DEBUG_MSG("#__ Parse json : success.\n");
 
                 // parse json to customConfig object
@@ -1341,7 +1342,7 @@ bool WiFiMan::getCustomConfig(CustomConfig *customConf)
         }
         else
         {
-            SPIFFS.end();
+            LittleFS.end();
             DEBUG_MSG("#__ Cannot open customConfig.json\n");
             DEBUG_MSG("#<< readCustomConfigJson-end\n");
             return false;
