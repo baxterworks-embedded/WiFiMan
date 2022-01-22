@@ -1,3 +1,6 @@
+# Fork
+I forked this to get it building with PlatformIO.
+
 # WiFiMan + ESP8266OTA
 WiFiMan is a WiFi manager for ESP8266 with a customizable web UI.   
 ESP8266OTA is a modified version of ESP8266HTTPUpdateServer also with a customizable web UI.    

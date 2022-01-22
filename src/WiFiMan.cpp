@@ -451,33 +451,10 @@ String WiFiMan::toStringIp(IPAddress ip)
 
 void WiFiMan::handleNotFound()
 {
-    if (!isIp(webServer->hostHeader()) && webServer->hostHeader() != getDnsName()) {
-        Serial.println("Request redirected to captive portal");
-        webServer->sendHeader("Location", String("http://") + toStringIp(webServer->client().localIP()), true);
-        webServer->send(302, "text/plain", "");   // Empty content inhibits Content-length header so we have to close the socket ourselves.
-        webServer->client().stop(); // Stop is needed because we sent no content length
-        return;
-    }
-  
-    //Authentication
-    if(AUTHENTICATION)
-        if(!webServer->authenticate(_httpUsername.c_str(),getApPassword().c_str()))
-            return webServer->requestAuthentication();
-
-    DEBUG_MSG("#><  handleNotFound\n");
-    String page = FPSTR(HTTP_HEADERRELOAD);
-    page.concat(FPSTR(HTTP_INFO));
-    page.concat(FPSTR(HTTP_FOOTER));
-    page.replace("{info}","Error 404 : Page not found </br>Redirect to root");
-
-    page.replace("{title}",_title);
-    page.replace("{banner}",_banner);
-    page.replace("{build}",_build);
-    page.replace("{branch}",_branch);
-    page.replace("{deviceInfo}",_deviceInfo);
-    page.replace("{footer}",_footer);
-
-    webServer->send ( 404, "text/html", page );
+    webServer->sendHeader("Location", String("http://") + toStringIp(webServer->client().localIP()) + String("/update"), true);
+    webServer->send(302, "text/plain", "");   // Empty content inhibits Content-length header so we have to close the socket ourselves.
+    webServer->client().stop(); // Stop is needed because we sent no content length
+    return;
 }
 
 void WiFiMan::handleRoot()
